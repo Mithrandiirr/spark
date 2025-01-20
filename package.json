@@ -19,5 +19,9 @@
   "workspaces": [
     "apps/*",
     "packages/*"
+  ],
+  "trustedDependencies": [
+    "core-js-pure",
+    "ws"
   ]
 }
