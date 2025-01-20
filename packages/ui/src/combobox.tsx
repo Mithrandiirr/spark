@@ -1,91 +1,91 @@
-'use client'
+"use client";
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { trpc } from '~/src/utils/trpc'
-import { useEffect, useState } from 'react'
-import Image from 'next/image'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { trpc } from "~/src/utils/trpc";
+import { useState } from "react";
+import Image from "next/image";
 import {
   Form,
-  FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
-} from '@/components/ui/form'
-import { Check } from 'lucide-react'
-import { cn } from '~/src/lib/utils'
-import { Button } from './button'
-import { animeSchema } from '~/src/server/routers/schemas/animeSchema'
-import { FormError } from '../form-error'
-import type { Review } from '@prisma/client'
-import { Anime } from '~/src/server/routers/schemas/test'
-import { useRouter } from 'next/navigation'
+  FormMessage,
+} from "@spark/ui/form";
+import { Check } from "lucide-react";
+import { cn } from "@spark/ui";
+import { Button } from "./button";
+import { animeSchema } from "~/src/server/routers/schemas/animeSchema";
+import { FormError } from "../form-error";
+import type { Review } from "@prisma/client";
+import { Anime } from "~/src/server/routers/schemas/test";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   anime: Anime,
   content: z.string(),
   spoiler: z.boolean(),
-  rating: z.string().regex(/^[1-5]$/, 'Rating must be a number between 1 and 5')
-})
+  rating: z
+    .string()
+    .regex(/^[1-5]$/, "Rating must be a number between 1 and 5"),
+});
 
 export function ComboboxForm() {
-  const [queryString, setQuery] = useState('')
-  const { data: dbAnimes } = trpc.anime.getAnimes.useQuery()
+  const [queryString, setQuery] = useState("");
+  const { data: dbAnimes } = trpc.anime.getAnimes.useQuery();
   const {
     data: animesSearch,
     isFetched,
-    isFetching
+    isFetching,
   } = trpc.anime.searchAnimes.useQuery(queryString, {
-    enabled: queryString.length > 0
-  })
-  const { data: animes } = trpc.anime.getSearchedAnimes.useQuery(queryString)
-  const utils = trpc.useUtils()
+    enabled: queryString.length > 0,
+  });
+  const { data: animes } = trpc.anime.getSearchedAnimes.useQuery(queryString);
+  const utils = trpc.useUtils();
   const {
     mutate,
     data: review,
-    isSuccess
+    isSuccess,
   } = trpc.reviews.createReview.useMutation({
     onSuccess(rev: Review) {
-      utils.reviews.reviewList.invalidate()
-      if (typeof window !== 'undefined') {
-        window.location.href = `/reviews/${rev.id}`
+      utils.reviews.reviewList.invalidate();
+      if (typeof window !== "undefined") {
+        window.location.href = `/reviews/${rev.id}`;
       }
-    }
-  })
+    },
+  });
 
-  const router = useRouter()
+  const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      anime: { title: '', malId: '', imageJpg: '' },
-      content: '',
+      anime: { title: "", malId: "", imageJpg: "" },
+      content: "",
       spoiler: false,
-      rating: ''
-    }
-  })
+      rating: "",
+    },
+  });
 
-  const handleSearch = event => {
-    setQuery(event.target.value)
-  }
+  const handleSearch = (event) => {
+    setQuery(event.target.value);
+  };
 
   const handleSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log(data)
+    console.log(data);
     mutate({
       anime: data.anime,
       content: data.content,
       rating: parseInt(data.rating),
-      spoiler: data.spoiler
-    })
-  }
+      spoiler: data.spoiler,
+    });
+  };
 
-  const handleSelect = anime => {
-    form.setValue('anime', anime)
-    form.setValue('anime.title', anime.title)
-    console.log(anime)
-  }
+  const handleSelect = (anime) => {
+    form.setValue("anime", anime);
+    form.setValue("anime.title", anime.title);
+    console.log(anime);
+  };
 
   return (
     <Form {...form}>
@@ -103,20 +103,20 @@ export function ComboboxForm() {
                 type="text"
                 className="text-2xl p-2 border border-gray-300 rounded bg-white/5"
                 placeholder="Search animes"
-                {...form.register('anime.title')}
+                {...form.register("anime.title")}
                 onChange={handleSearch}
               />
               {/* {!isFetching && <div className="text-2xl">Loading...</div>} */}
               {animesSearch && (
                 <div className="flex flex-col gap-2 mt-2 bg-white/5 rounded-md">
-                  {animesSearch.map(anime => (
+                  {animesSearch.map((anime) => (
                     <div
                       key={anime.malId}
                       className="cursor-pointer p-2 flex flex-row gap-2 items-center hover:bg-white/20 rounded-md"
                       onClick={() => handleSelect(anime)}
                     >
                       <Image
-                        src={anime.imageJpg || ''}
+                        src={anime.imageJpg || ""}
                         alt=""
                         className="w-20 h-24 rounded-md object-cover"
                         width={100}
@@ -124,10 +124,11 @@ export function ComboboxForm() {
                       />
                       <Check
                         className={cn(
-                          'mr-2 h-4 w-4 text-2xl ',
-                          anime.malId.toString() === field.value?.malId.toString()
-                            ? 'opacity-100'
-                            : 'opacity-0'
+                          "mr-2 h-4 w-4 text-2xl ",
+                          anime.malId.toString() ===
+                            field.value?.malId.toString()
+                            ? "opacity-100"
+                            : "opacity-0"
                         )}
                       />
                       {anime.title}
@@ -151,7 +152,7 @@ export function ComboboxForm() {
                   className="text-2xl p-2 border border-gray-300 rounded bg-white/5"
                   placeholder="Enter description"
                   {...field}
-                  {...form.register('content')}
+                  {...form.register("content")}
                 />
                 <FormMessage />
                 <FormError />
@@ -168,7 +169,7 @@ export function ComboboxForm() {
                   type="checkbox"
                   className="mt-2"
                   {...field}
-                  onChange={e => field.onChange(e.target.checked)}
+                  onChange={(e) => field.onChange(e.target.checked)}
                 />
                 <FormMessage />
                 <FormError />
@@ -187,7 +188,7 @@ export function ComboboxForm() {
                 className="text-2xl p-2 border border-gray-300 rounded bg-white/5"
                 placeholder="Enter rating (1-5)"
                 {...field}
-                {...form.register('rating')}
+                {...form.register("rating")}
                 min={1}
                 max={5}
               />
@@ -196,10 +197,10 @@ export function ComboboxForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" variant={'secondary'}>
+        <Button type="submit" variant={"secondary"}>
           Submit
         </Button>
       </form>
     </Form>
-  )
+  );
 }
