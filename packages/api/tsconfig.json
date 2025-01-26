@@ -1,8 +1,11 @@
 {
-  "extends": "@spark/typescript-config/internal-package.json",
+ "extends": "@spark/typescript-config/internal-package.json",
   "include": ["src"],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    "moduleResolution": "node16"
+    "moduleResolution": "bundler", // Change to match the `auth` package
+    "module": "ESNext",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true
   }
 }

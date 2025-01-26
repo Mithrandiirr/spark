@@ -1,6 +1,6 @@
 'use server'
 
-import { getServerSession, Session } from 'next-auth'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '@spark/auth'
 import EventEmitter from 'events'
 import * as trpcNext from '@trpc/server/adapters/next'
@@ -10,7 +10,7 @@ import prisma from '@spark/db'
 
 // import authConfig from '~/auth.config'
 type CreateContextOptions = {
-  session: Session | null
+  session: any | null
 }
 
 export const getServerAuthSession = () => getServerSession(authOptions)
