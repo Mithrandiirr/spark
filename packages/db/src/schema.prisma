@@ -1,0 +1,349 @@
+// prisma/schema.prisma
+datasource db {
+ provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum Status {
+  WATCHING
+  COMPLETED
+  ON_HOLD
+  DROPPED
+  PLAN_TO_WATCH
+}
+
+
+
+model Anime {
+  id                Int        @id @default(autoincrement())
+  airedFrom         DateTime?
+  airedTo           DateTime?
+  airing            Boolean?
+  approved          Boolean?
+  background        String?
+  broadcastDay      String?
+  broadcastTime     String?
+  broadcastTimezone String?
+  broadcastString   String?
+  demographics      String[]
+  duration          String?
+  episodes          Float?
+  explicitGenres    String[]
+  favorites         Int?
+  imageJpg          String?
+  imageWebp         String?
+  licensors         String[]
+  malId             Int        @unique
+  members           Int?
+  popularity        Int?
+  producers         String[]
+  rank              Int?
+  rating            String?
+  score             Float?
+  scoredBy          Int?
+  season            String?
+  source            String?
+  status            String?
+  studios           String[]
+  synopsis          String?
+  themes            String[]
+  title             String?
+  titleEnglish      String?
+  titleJapanese     String?
+  titleSynonyms     String[]
+  trailerYoutubeId  String?
+  trailerUrl        String?
+  trailerEmbedUrl   String?
+  type              String?
+  url               String?
+  year              Int?
+
+  reviews           Review[]   @relation // Add a relation to Review
+  genres            String[]
+
+  lists             ListAnime[] @relation() // Add a relation to ListAnime
+  @@map("animes")
+}
+model ScrapingCheckpoint {
+  id        Int    @id @default(autoincrement())
+  lastPage  Int    @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model TopAnime {
+  id                Int        @id @default(autoincrement())
+  malId             Int        @unique
+  title             String
+  imageUrl          String?
+  url               String?
+  score             Float?
+  rank              Int?
+  popularity        Int?
+  members           Int?
+  favorites         Int?
+  airedFrom         DateTime?
+  airedTo           DateTime?
+  episodes          Int?
+  status            String?
+  type              String?
+}
+
+model Metadata{
+  id        Int    @id @default(autoincrement())
+  malId     Int    @unique
+  type      String
+  name      String
+  url       String
+
+}
+
+model User {
+  id                    String                 @id @default(cuid())
+  name                  String?                @unique
+  email                 String?                @unique
+  emailVerified         DateTime?
+  image                 String?
+  cover                 String?
+  password              String?
+  role                  UserRole               @default(USER)
+  accounts              Account[]
+  isTwoFactorEnabled    Boolean                @default(false)
+  twoFactorConfirmation TwoFactorConfirmation?
+  reviews               Review[] // Add a relation to reviews
+  comments              Comment[] // Add a relation to comments
+  //User can add to his list animes/mangas he wants to watch/read
+  watchList             WatchList[] // Changed relation to new WatchList model
+  readList              ReadList[] // Keep readList similar to watchList
+  // add favourites
+  favourites            Favourite[] // Relation to likes
+  likes                 Like[] // Relation to likes
+  discussions           Discussion[] // Add a relation to discussions
+  lists                 List[] // Add a relation to lists
+  posts                 Post[] // Add a relation to posts
+
+  createdAt             DateTime               @default(now())
+}
+
+model Favourite {
+  id          String   @id @default(cuid())
+  userId      String
+  animeId     String   
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image       String
+  title       String
+  description String
+
+  @@unique([userId, animeId])
+}
+enum WatchStatus {
+  WATCHING
+  COMPLETED
+  ON_HOLD
+  DROPPED
+  PLAN_TO_WATCH
+}
+
+model Channel {
+  id        String   @id @default(cuid())
+  name      String
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model WatchList {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  image       String
+  animeId     String  
+  status      Status
+  startDate   DateTime?
+  finishDate  DateTime?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+// model WatchList {
+//   id          String   @id @default(cuid())
+//   userId      String
+//   title       String
+//   description String
+//   image       String
+//   animeId     Int      // Changed from String to Int
+//   status      Status
+//   startDate   DateTime?
+//   finishDate  DateTime?
+//   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
+model ReadList {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  image       String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  content   String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  channelId String
+  channel   Channel  @relation(fields: [channelId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  reviewId      String?  // Optional
+  discussionId  String?  // Optional
+  listId        String?  // Optional
+  review        Review?  @relation(fields: [reviewId], references: [id])
+  discussion    Discussion? @relation(fields: [discussionId], references: [id])
+  list          List?    @relation(fields: [listId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listId])
+  @@unique([userId, reviewId])
+  @@unique([userId, discussionId])
+}
+model Review {
+  id        String   @id @default(cuid())
+  content   String
+  rating    Int
+  animeId   Int   
+  userId    String // Add the user who created the review
+  user      User     @relation(fields: [userId], references: [id])
+  anime     Anime    @relation(fields: [animeId], references: [malId]) // Add relation to Anime
+  comments  Comment[] // Add a relation to comments
+  likes     Like[] // Change to many-to-many relation with Like model
+  spoiler   Boolean
+  createdAt DateTime @default(now())
+}
+
+model Discussion {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  comments  Comment[] // Add a relation to comments
+  likes     Like[] // Change to many-to-many relation with Like model
+  createdAt DateTime @default(now())
+}
+
+model List {
+  id        String   @id @default(cuid())
+  title     String
+  description String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  // animes    Anime[]  // Add a relation to animes
+  animes    ListAnime[]  // Change to ListAnime model
+  likes     Like[] // Change to many-to-many relation with Like model
+  comments  Comment[] // Add a relation to comments
+  createdAt DateTime @default(now())
+
+}
+
+model ListAnime {
+  id        String   @id @default(cuid())
+  listId    String
+  animeId   Int
+  list      List     @relation(fields: [listId], references: [id])
+  anime     Anime    @relation(fields: [animeId], references: [malId])
+  createdAt DateTime @default(now())
+  order     Int
+  @@unique([listId, animeId])
+}
+
+model Comment {
+  id          String    @id @default(cuid())
+  content     String
+  userId      String
+  reviewId    String?
+  review      Review?    @relation(fields: [reviewId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+  
+  // Parent comment relation to create a tree-like structure
+  parentId    String?   // Optional for top-level comments
+  parent      Comment?  @relation("ParentChild", fields: [parentId], references: [id])
+  replies     Comment[] @relation("ParentChild") // Children comments
+  //Discussion comment relation
+  discussionId String?
+  discussion Discussion? @relation(fields: [discussionId], references: [id])
+  //List comment relation
+  listId String?
+  list List? @relation(fields: [listId], references: [id])
+
+}
+
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorConfirmation {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+}

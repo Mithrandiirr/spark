@@ -1,5 +1,8 @@
 {
   "extends": "@spark/typescript-config/internal-package.json",
   "include": ["src"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "moduleResolution": "node16"
+  }
 }

@@ -5,7 +5,8 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prisma:generate": "prisma generate --schema=./packages/db/src/schema.prisma"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.20.0",
