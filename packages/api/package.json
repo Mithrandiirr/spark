@@ -2,7 +2,7 @@
   "name": "@spark/api",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
+
   "types": "./dist/index.d.ts", 
   "exports": {
     ".": {
@@ -21,6 +21,7 @@
   "dependencies": {
     "@trpc/server": "^10.45.1",
     "@trpc/client": "^10.45.1",
+    "@trpc/react-query": "^11.0.0-rc.436",
     "superjson": "^2.2.1",
     "zod": "^3.23.8"
   },

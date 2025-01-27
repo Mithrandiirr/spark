@@ -1,12 +1,13 @@
 import Image, { type ImageProps } from "next/image";
-import { Button } from "@spark/ui/button";
+import  { Button }  from "@spark/ui/button";
 import styles from "./page.module.css";
-import { Avatar } from "@spark/ui/avatar";
+
 
 type Props = Omit<ImageProps, "src"> & {
   srcLight: string;
   srcDark: string;
 };
+
 
 const ThemeImage = (props: Props) => {
   const { srcLight, srcDark, ...rest } = props;
@@ -19,11 +20,12 @@ const ThemeImage = (props: Props) => {
   );
 };
 
+
 export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Avatar />
+        {/* <Avatar /> */}
         <ThemeImage
           className={styles.logo}
           srcLight="turborepo-dark.svg"
@@ -65,7 +67,7 @@ export default function Home() {
             Read our docs
           </a>
         </div>
-        <Button appName="web" className={styles.secondary}>
+        <Button type="button" className={styles.secondary}>
           Open alert
         </Button>
       </main>

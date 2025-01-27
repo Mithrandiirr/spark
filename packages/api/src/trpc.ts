@@ -1,16 +1,16 @@
 import { TRPCError, initTRPC } from '@trpc/server'
 import {  createTRPCContext } from './context'
 import superjson from "superjson";
+import { createTRPCReact } from '@trpc/react-query'
+
 import { ZodError } from 'zod'
-type User = {
-  id: string
-  email: string
-  name: string
-}
+import type { AppRouter } from './root';
+
 
 
 // You can use any variable name you like.
 // We use t to keep things simple.
+export const trpc = createTRPCReact<AppRouter>({})
 const t = initTRPC.context<typeof createTRPCContext>().create(
   {
     transformer: superjson,

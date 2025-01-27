@@ -2,7 +2,8 @@ import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 import type { AppRouter } from "./root";
 import { appRouter } from "./root";
-
+import { trpc } from "./trpc";
+import { AnimeSchema } from "./schemas/anime";
 /**
  * Create a server-side caller for the tRPC API
  * @example
@@ -10,7 +11,6 @@ import { appRouter } from "./root";
  * const res = await trpc.post.all();
  *       ^? Post[]
  */
-
 /**
  * Inference helpers for input types
  * @example
@@ -27,5 +27,5 @@ type RouterInputs = inferRouterInputs<AppRouter>;
  **/
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export {  appRouter };
+export {  appRouter, trpc, AnimeSchema };
 export type { AppRouter, RouterInputs, RouterOutputs };
